@@ -7,13 +7,10 @@ Created on Wed May  9 19:21:22 2018
 """
 
 from collections import defaultdict
-from pyspark import SparkContext
-from pyspark.mllib.linalg import Vector, Vectors
-from pyspark.mllib.clustering import LDA, LDAModel
-from pyspark.sql import SQLContext
-import re
+from pyspark.mllib.linalg import Vectors
 import numpy as np
 import csv
+import glob
 from time import time
 
 def document_vector(document):
@@ -56,6 +53,10 @@ def readFileLocations(path):
         file_paths.append(element)
     return file_paths
 
+def displayResults(result_data):
+    print("The recommendations are...\n")
+    for result in result_data:
+        print(file_paths[result])
     
 """
 Reading model data
@@ -76,7 +77,8 @@ num_docs = vectors.shape[0]
 num_topics = topic_word_matrix.shape[1]
 vocab_len = len(vocabulary)
 no_of_results = 10
-individual_file_paths = get
+path = '/home/sakshi/Documents/big_data/data/*/*'
+file_paths = readFileLocations(path)
 
 """
 Main program
@@ -84,29 +86,4 @@ Main program
 query = input("Enter the query:\n")
 query_vec = getQueryVector(query)
 results = nMostSimilarDocuments(query_vec,no_of_results)
-print("Top " + str(no_of_results) + " documents for the query from the dataset are...\n")
-print(results)
-
-
-
-import glob
-import pandas as pd
-path = '/home/sakshi/Documents/big_data/data/*/*' #note C:
-files = glob.glob(path)
-files_data = []
-count = 0
-exceptions = 0
-names = []
-for name in files:
-    names.append(name)
-    try:
-        file = []
-        with open(name) as f:
-            for line in f:
-#                line.split('\n')
-                file.append(line)
-            files_data.append(file)
-    except:
-        print("Unknown exception")
-        exceptions+=1
-        files_data.append("File not found")
+displayResults(results)
