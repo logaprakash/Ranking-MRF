@@ -13,6 +13,9 @@ from pyspark.sql import SQLContext
 import re
 import numpy as np
 import csv
+from time import time
+
+a = time()
 
 def document_vector(document):
     id = document[1]
@@ -61,7 +64,7 @@ vocabulary = termCounts                         \
     .collectAsMap()
 
 documents = tokens.zipWithIndex().map(document_vector).map(list)
-inv_voc = {value: key for (key, value) in vocabulary.items()}
+#inv_voc = {value: key for (key, value) in vocabulary.items()}
 
 lda_model = LDA.train(documents, k=num_topics, maxIterations=max_iterations)
 topic_indices = lda_model.describeTopics(maxTermsPerTopic=num_words_per_topic)
@@ -101,3 +104,5 @@ with open('/home/sakshi/Documents/big_data/vocabulary.csv', 'w') as f:  # Just u
 Ending session
 """
 sc.stop()
+
+b = time() -a
