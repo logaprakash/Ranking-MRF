@@ -12,6 +12,8 @@ import numpy as np
 import csv
 import glob
 from time import time
+import os
+import subprocess as sb
 
 def document_vector(document):
     id = document[1]
@@ -38,13 +40,13 @@ def getQueryVector(query):
     
     return query_vector
 
-def nMostSimilarDocuments(query_vector,no_of_results):
+def nMostSimilarDocuments(query_vector_arg,no_of_results_arg):
     dist_matrix = np.zeros((num_docs,num_topics))
     for dist_index in range(num_docs):
-        dist_matrix[dist_index] = vectors[dist_index] - query_vector.shape
+        dist_matrix[dist_index] = vectors[dist_index] - query_vector_arg
     
     distances = np.sum(dist_matrix**2, axis=1)
-    return distances.argsort()[:no_of_results]
+    return distances.argsort()[:no_of_results_arg]
 
 def readFileLocations(path):
     file_paths = []
@@ -53,11 +55,22 @@ def readFileLocations(path):
         file_paths.append(element)
     return file_paths
 
-def displayResults(result_data):
+def displayResultPaths(result_data):
     print("The recommendations are...\n")
+    
+    result_paths = []
     for result in result_data:
+        result_paths.append(file_paths[result])
         print(file_paths[result])
     
+    return result_paths
+    
+def openResultsGedit(result_paths):
+    for path in result_paths:       
+        proc = sb.Popen(['gedit', path])
+        proc.wait()
+        
+
 """
 Reading model data
 """
@@ -68,6 +81,7 @@ for line in dict_reader:
 vocabulary = vocabulary[0]
 
 vectors = np.genfromtxt('/home/sakshi/Documents/big_data/vectors.csv', delimiter=',')
+vectors = vectors/np.amax(vectors)
 topic_word_matrix = np.genfromtxt('/home/sakshi/Documents/big_data/topic_word_matrix.csv', delimiter=',')
 
 """
@@ -76,7 +90,7 @@ Declaring variables
 num_docs = vectors.shape[0]
 num_topics = topic_word_matrix.shape[1]
 vocab_len = len(vocabulary)
-no_of_results = 10
+no_of_results = 3
 path = '/home/sakshi/Documents/big_data/data/*/*'
 file_paths = readFileLocations(path)
 
@@ -85,5 +99,8 @@ Main program
 """
 query = input("Enter the query:\n")
 query_vec = getQueryVector(query)
+#query_vec = query_vec/max(query_vec)
 results = nMostSimilarDocuments(query_vec,no_of_results)
-displayResults(results)
+#print(results)
+result_paths = displayResultPaths(results)
+openResultsGedit(result_paths)
